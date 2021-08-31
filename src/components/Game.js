@@ -11,9 +11,17 @@ export default class Game extends Component {
                 {squares: Array(9).fill(null)}
             ]
         }
-        this.handleClick = this.handleClick.bind(this);
-
+        //this.handleClick = this.handleClick.bind(this);
+        //this.jumpTo = this.jumpTo.bind(this);
     }
+
+    jumpTo(step){
+        this.setState({
+            stepNumber: step,
+            xIsNext: (step%2)===0
+        });
+    }
+
     handleClick(i){
         console.log(i);
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
@@ -25,6 +33,7 @@ export default class Game extends Component {
         // also if squares[i] exist that means player has fille the square then 
         // that will also not create any changes so that block will not get change. 
         if(winner || squares[i]){
+            console.log(winner);
             return;
         }
 
@@ -50,6 +59,25 @@ export default class Game extends Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber]
+        const winner = calculateWinner[current.squares];
+        const moves = history.map((step, move)=> {
+            const desc = move ? 'Go to #' + move : 'start the game';
+            return (
+                <li key={move}>
+                    <button onClick={()=> this.jumpTo(move)}>
+                        {desc}
+                    </button>
+                </li>
+            )
+        });
+
+        let status;
+        if(winner){
+            status ="Winner is " + winner ;  
+        }else {
+            
+            status = `Next player is ${(this.state.xIsNext ? 'X' : 'O')}`;
+        }
 
         return (
             <div className='game'>
@@ -57,7 +85,12 @@ export default class Game extends Component {
                     <Board 
                         onClick={(i)=>this.handleClick(i)} 
                         squares={current.squares}
-                    />
+                    />                    
+                </div>
+                <div className='game-info'>
+                    <div>{status}</div>
+                    <div>{winner}</div>
+                    <ul>{moves}</ul>                
                 </div>
                 
             </div>
@@ -76,9 +109,10 @@ function calculateWinner(squares) {
         [0, 4, 8],
         [2, 4, 6]
     ];
-    for (let i=0; i< lines.length ; i++){
+
+    for (let i=0; i < lines.length ; i++){
         const[a, b, c] = lines[i];
-        if ( squares[a] && squares[a]===squares[b] && squares[b]===squares[c]){
+        if ( squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
             return squares[a];          // if return value is 'x' then 'x' is winner. and same for 'o'.
         }
     } 
